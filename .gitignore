@@ -1,0 +1,40 @@
+# Terraform local state, plans, and generated files
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform CLI configuration can contain local credentials or machine-specific settings
+.terraformrc
+terraform.rc
+
+# Kubernetes and Azure local credentials
+kubeconfig
+kubeconfig.*
+*.kubeconfig
+.kube/
+.azure/
+
+# Secrets and local environment files
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# OS and editor files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
