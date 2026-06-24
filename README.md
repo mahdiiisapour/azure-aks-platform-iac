@@ -1,6 +1,6 @@
 # Azure AKS Platform IaC
 
-Portfolio-grade Azure AKS platform built step by step for learning and demonstrating senior Kubernetes platform architecture on Azure.
+Azure AKS platform built step by step for learning and demonstrating senior Kubernetes platform architecture on Azure.
 
 ## Goal
 
