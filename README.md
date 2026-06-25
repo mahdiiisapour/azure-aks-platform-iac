@@ -1,37 +1,40 @@
-# Azure AKS Platform IaC
+# Azure AKS Platform Reference Architecture
 
-Azure AKS platform built step by step for learning and demonstrating senior Kubernetes platform architecture on Azure.
+Secure, GitOps-managed Azure AKS platform for internal engineering teams.
 
 ## Goal
 
-Build a secure, GitOps-managed AKS platform for internal engineering teams, provisioned with Terraform and designed around Microsoft Entra identity, Azure networking, workload identity, Azure-native observability, policy-driven controls, and repeatable day-2 operations.
+Build a secure, GitOps-managed AKS platform for internal engineering teams, provisioned with Terraform and designed around Entra ID, Azure RBAC, Workload Identity, Azure networking, Azure-native observability, policy-driven controls, and repeatable day-2 operations.
 
 ## Initial Scope
 
 - One Azure subscription
-- One non-production environment: `dev`
-- Azure region: `westeurope`
+- One `dev` environment
+- `westeurope`
 - AKS Standard
-- Terraform-managed Azure infrastructure
+- Terraform for Azure infrastructure
 - GitHub Actions with OIDC federation
-- Argo CD-managed Kubernetes resources
+- Argo CD for Kubernetes GitOps
 - Azure Container Registry
 - Azure Key Vault
-- Microsoft Entra ID and Azure RBAC
-- Azure Workload Identity
+- Entra ID, Azure RBAC, and Workload Identity
 - Azure Monitor, Managed Prometheus, and Managed Grafana
-- One sample workload proving Key Vault access without static credentials
+- Sample workload that accesses Key Vault without static credentials
 
 ## Non-Goals
 
 - Multi-region disaster recovery
-- Full Azure landing zone
-- Hub-and-spoke networking
-- Azure Firewall
 - Private AKS API endpoint
-- Multiple subscriptions or environments
-- Production workloads or real data
+- Hub-spoke networking
+- Azure Firewall
+- Full landing zone
+- Production workloads or data
 - Premature reusable Terraform modules
+
+## Ownership Model
+
+- Terraform owns Azure resources.
+- Argo CD owns Kubernetes resources.
 
 ## Repository Layout
 
@@ -47,6 +50,7 @@ docs/
   architecture/       Architecture notes and diagrams
   adr/                Architecture decision records
   runbooks/           Operational procedures
+scripts/              Local helper scripts
 .github/
   workflows/          CI/CD automation
 ```
@@ -69,5 +73,6 @@ Prefer Microsoft Entra identity, OIDC federation, managed identity, and Azure Wo
 
 ## Current Status
 
-Step 0/1 foundation only. No Azure resources have been created.
+Phase 0 — Architecture and repository foundation.
 
+No Azure resources have been created.

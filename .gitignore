@@ -3,6 +3,9 @@
 *.tfstate
 *.tfstate.*
 *.tfplan
+tfplan
+tfplan.*
+plan.out
 *.tfvars
 *.tfvars.json
 crash.log
@@ -38,3 +41,5 @@ kubeconfig.*
 *.swp
 *.swo
 
+# Keep provider checksums committed for repeatable Terraform installs
+!.terraform.lock.hcl
