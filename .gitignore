@@ -43,3 +43,6 @@ kubeconfig.*
 
 # Keep provider checksums committed for repeatable Terraform installs
 !.terraform.lock.hcl
+
+# Local project environment
+.envrc
