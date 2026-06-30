@@ -1,8 +1,8 @@
 # Bootstrap Terraform State Storage
 
-This layer creates the Azure Storage resources that will later hold Terraform remote state.
+This layer creates the Azure Storage resources that hold Terraform remote state.
 
-It must be applied first while Terraform still uses local state. There is no `backend "azurerm"` block in this layer by design, because the backend storage account and container do not exist until after the first successful apply.
+It must be applied first while Terraform still uses local state. After the first successful apply, migrate the local state into the Azure Blob container using the procedure below.
 
 ## What This Layer Creates
 
@@ -41,11 +41,55 @@ Public network access remains enabled initially because Terraform will run from 
 
 This avoids introducing private endpoints, DNS, VPN connectivity, NAT, or IP firewall rules before the platform network exists. Network restrictions should be added later as an explicit architecture decision.
 
-## Future State Migration Goal
+## State Migration Procedure
 
-After this layer has been applied successfully, a later change will migrate Terraform state to Azure Blob remote state authenticated through Microsoft Entra ID.
+This layer now declares a partial AzureRM backend in `backend.tf`. Backend settings that vary by local environment live in `backend.local.hcl`, which is intentionally ignored by Git.
 
-That future step will add an `azurerm` backend block and migrate state deliberately. It is intentionally not part of this first bootstrap implementation.
+From `infra/00-bootstrap`, obtain the storage account name from the existing local state:
+
+```bash
+terraform output -raw storage_account_name
+```
+
+Create the ignored backend config file from the committed example:
+
+```bash
+cp backend.local.hcl.example backend.local.hcl
+```
+
+Edit `backend.local.hcl` and set:
+
+```hcl
+resource_group_name  = "rg-aks-platform-bootstrap-neu"
+storage_account_name = "<value-from-terraform-output>"
+container_name       = "tfstate"
+key                  = "bootstrap/terraform.tfstate"
+use_azuread_auth     = true
+```
+
+Migrate local state into the Azure Blob backend:
+
+```bash
+terraform init -migrate-state -backend-config=backend.local.hcl
+```
+
+When Terraform prompts to copy the existing state to the new backend, confirm the migration.
+
+Verify Terraform can read the migrated state:
+
+```bash
+terraform state list
+```
+
+Verify the state blob exists using Azure CLI with Entra authentication:
+
+```bash
+az storage blob show \
+  --account-name "$(terraform output -raw storage_account_name)" \
+  --container-name tfstate \
+  --name bootstrap/terraform.tfstate \
+  --auth-mode login
+```
 
 ## Required Permissions
 
@@ -54,8 +98,11 @@ The signed-in Azure principal must be able to:
 - Create resource groups and storage accounts in the target subscription
 - Create blob containers through Azure Resource Manager
 - Assign Azure RBAC roles at the container scope
+- Read and write blobs in the `tfstate` container
 
 The role assignment requires permissions such as `Owner` or `User Access Administrator` at the relevant scope.
+
+Local Terraform backend access uses Azure CLI login. The principal used by `az login` needs `Storage Blob Data Contributor` on the state container.
 
 ## Safe Commands
 
