@@ -8,6 +8,7 @@ tfplan.*
 plan.out
 *.tfvars
 *.tfvars.json
+backend.local.hcl
 crash.log
 crash.*.log
 override.tf
@@ -43,6 +44,7 @@ kubeconfig.*
 
 # Keep provider checksums committed for repeatable Terraform installs
 !.terraform.lock.hcl
+!backend.local.hcl.example
 
 # Local project environment
 .envrc
