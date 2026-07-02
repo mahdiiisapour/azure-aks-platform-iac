@@ -40,8 +40,7 @@ Build a secure, GitOps-managed AKS platform for internal engineering teams, prov
 
 ```text
 infra/
-  00-bootstrap/       Terraform state storage and CI/CD identity
-  10-foundation/      Persistent dev resource group and shared metadata
+  00-bootstrap/       Terraform state storage and persistent dev resource group
   20-network/         VNet, subnets, and network controls
   30-aks/             AKS, node pools, and cluster configuration
   40-observability/   Azure Monitor, Managed Prometheus, and Grafana
@@ -73,6 +72,6 @@ Prefer Microsoft Entra identity, OIDC federation, managed identity, and Azure Wo
 
 ## Current Status
 
-Phase 2A — Foundation layer.
+Phase 2A — Bootstrap-owned foundation.
 
-`infra/00-bootstrap` owns Terraform state storage. `infra/10-foundation` owns the persistent `dev` platform resource group.
+`infra/00-bootstrap` owns Terraform state storage and the persistent `dev` platform resource group.

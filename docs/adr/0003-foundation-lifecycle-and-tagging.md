@@ -1,4 +1,4 @@
-# ADR 0003: Foundation Lifecycle and Tagging
+# ADR 0003: Bootstrap-Owned Foundation Lifecycle and Tagging
 
 ## Status
 
@@ -16,7 +16,13 @@ The development platform resource group also needs clear naming and metadata so 
 
 ## Decision
 
-`infra/00-bootstrap` and `infra/10-foundation` are persistent layers.
+`infra/00-bootstrap` is the persistent bootstrap layer. It owns:
+
+- Terraform state storage
+- The persistent development platform resource group `rg-aks-platform-dev-neu`
+- Shared project tags needed by those resources
+
+`infra/10-foundation` has been removed to simplify the layer model.
 
 The disposable layers are:
 
@@ -26,6 +32,8 @@ The disposable layers are:
 - `infra/50-security`
 
 The development resource group remains when AKS is destroyed. AKS, networking, observability, and security resources can be removed and recreated inside the same resource group without deleting the organisational boundary.
+
+Separating bootstrap and foundation would be more common in a larger enterprise platform, especially with multiple subscriptions, environments, teams, or lifecycle owners. This repository intentionally keeps those persistent concerns together in `00-bootstrap` for a smaller personal learning project.
 
 Use this naming convention for regional Azure resources:
 
@@ -45,7 +53,7 @@ Owner, cost, lifecycle, and classification metadata belong in tags rather than n
 
 ## Rationale
 
-Keeping bootstrap and foundation persistent avoids accidental loss of Terraform state storage and the platform resource group. The daily destroy workflow should target only resources that are expected to be recreated frequently.
+Keeping bootstrap-owned foundation resources persistent avoids accidental loss of Terraform state storage and the platform resource group. The daily destroy workflow should target only resources that are expected to be recreated frequently.
 
 Names should identify the resource type, workload, environment, and region. They should stay short, predictable, and stable.
 
@@ -61,9 +69,13 @@ Changing tags is safer than renaming resources, and Azure cost and inventory too
 
 ## Alternatives Considered
 
-### Destroy the foundation resource group every day
+### Destroy the development resource group every day
 
 This would keep teardown simple, but it would also remove the stable container that later layers target. It increases the chance of accidental lifecycle coupling between persistent state and disposable workloads.
+
+### Keep `10-foundation` as a separate persistent layer
+
+This would be a conventional enterprise-style separation. It is not needed for the current scope because the only foundation resource is the persistent dev resource group.
 
 ### Encode owner and cost metadata in names
 
@@ -75,7 +87,6 @@ Tags are useful metadata for reporting, automation, and policy evaluation, but t
 
 ## Consequences
 
-The destroy workflow must explicitly exclude `00-bootstrap` and `10-foundation`.
+The destroy workflow must explicitly exclude `00-bootstrap`.
 
 Later layers should consume or consistently target the persistent dev resource group rather than creating their own top-level resource groups unless a new ADR changes the lifecycle model.
-

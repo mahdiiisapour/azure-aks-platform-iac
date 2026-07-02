@@ -1,6 +1,6 @@
 # Bootstrap Terraform State Storage
 
-This layer creates the Azure Storage resources that hold Terraform remote state.
+This layer creates the Azure Storage resources that hold Terraform remote state and owns the persistent development platform resource group.
 
 It must be applied first while Terraform still uses local state. After the first successful apply, migrate the local state into the Azure Blob container using the procedure below.
 
@@ -10,12 +10,21 @@ It must be applied first while Terraform still uses local state. After the first
 - A StorageV2 storage account with a random suffix for global uniqueness
 - A private `tfstate` blob container
 - A role assignment granting the current Azure principal `Storage Blob Data Contributor` on the state container
+- The persistent development platform resource group: `rg-aks-platform-dev-neu`
 
 The wider AKS platform remains scoped to West Europe. Bootstrap state storage is placed in North Europe because storage account creation in West Europe was rejected for this subscription with Azure's `locationineligible` response.
 
-## Why A Separate Resource Group
+## Why Bootstrap Owns The Dev Resource Group
 
-Terraform state is platform-critical. Keeping it in its own bootstrap resource group separates state storage from later AKS platform resources and makes ownership, review, and future lifecycle decisions clearer.
+Terraform state storage and the persistent dev resource group are both outside the daily destroy workflow. Keeping them together in `00-bootstrap` simplifies the repository while preserving the important lifecycle boundary: disposable platform resources can be destroyed without deleting state storage or the dev resource group.
+
+Separating bootstrap and foundation would be more common in a larger enterprise platform, especially with multiple environments, subscriptions, or team ownership boundaries. This repository intentionally keeps that split simpler.
+
+The dev resource group remains after daily cleanup. Later layers create network, AKS, observability, and security resources inside it.
+
+## Why A Separate Bootstrap Resource Group
+
+Terraform state is platform-critical. Keeping state storage in its own bootstrap resource group separates state storage from later AKS platform resources and makes ownership, review, and future lifecycle decisions clearer.
 
 ## Why Shared-Key Access Is Disabled
 
@@ -99,6 +108,7 @@ The signed-in Azure principal must be able to:
 - Create blob containers through Azure Resource Manager
 - Assign Azure RBAC roles at the container scope
 - Read and write blobs in the `tfstate` container
+- Import and manage the persistent dev platform resource group
 
 The role assignment requires permissions such as `Owner` or `User Access Administrator` at the relevant scope.
 

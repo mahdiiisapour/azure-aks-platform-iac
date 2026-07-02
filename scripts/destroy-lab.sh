@@ -2,9 +2,9 @@
 set -Eeuo pipefail
 
 # Destroys only disposable Azure lab layers.
-# It intentionally NEVER touches protected persistent layers:
-# - infra/00-bootstrap: Terraform remote-state storage
-# - infra/10-foundation: persistent dev platform resource group
+# It intentionally NEVER touches infra/00-bootstrap, which owns:
+# - Terraform remote-state storage
+# - The persistent dev platform resource group
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -49,9 +49,7 @@ export ARM_RESOURCE_PROVIDER_REGISTRATIONS=none
 
 echo "Azure subscription: $(az account show --query name --output tsv)"
 echo "Repository: ${REPO_ROOT}"
-echo "Protected layers:"
-echo "- infra/00-bootstrap"
-echo "- infra/10-foundation"
+echo "Protected layer: infra/00-bootstrap"
 echo
 
 for LAYER in "${LAYERS[@]}"; do
@@ -96,6 +94,4 @@ done
 
 echo
 echo "Destroy completed."
-echo "Protected layers were not touched:"
-echo "- infra/00-bootstrap"
-echo "- infra/10-foundation"
+echo "infra/00-bootstrap was not touched."
