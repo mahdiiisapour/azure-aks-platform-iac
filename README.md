@@ -72,6 +72,6 @@ Prefer Microsoft Entra identity, OIDC federation, managed identity, and Azure Wo
 
 ## Current Status
 
-Phase 2A — Bootstrap-owned foundation.
+Phase 3A — Network baseline.
 
-`infra/00-bootstrap` owns Terraform state storage and the persistent `dev` platform resource group.
+`infra/00-bootstrap` owns Terraform state storage and the persistent `dev` platform resource group. `infra/20-network` defines the disposable VNet and subnet baseline for future AKS.
