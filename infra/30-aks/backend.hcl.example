@@ -1,0 +1,14 @@
+# Copy this file to backend.local.hcl for local use.
+#
+# backend.local.hcl is intentionally ignored by Git because it is local
+# environment configuration for Terraform backend initialisation.
+#
+# Do not add secrets, access keys, SAS tokens, client secrets, tenant IDs,
+# subscription IDs, or other credentials to this file.
+
+resource_group_name  = "rg-aks-platform-bootstrap-neu"
+storage_account_name = "staksplatftftop70f"
+container_name       = "tfstate"
+key                  = "aks/terraform.tfstate"
+use_azuread_auth     = true
+

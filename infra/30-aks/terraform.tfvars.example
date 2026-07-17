@@ -1,0 +1,11 @@
+# Copy values from the network layer output when creating a local ignored tfvars
+# file for planning:
+#
+# terraform -chdir=../20-network output -json
+#
+# Do not commit real tfvars files.
+
+vnet_address_space = ["10.50.0.0/16"]
+system_subnet_id   = "<read-from-20-network-output-subnet_ids-aks_system>"
+user_subnet_id     = "<read-from-20-network-output-subnet_ids-aks_user>"
+
