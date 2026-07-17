@@ -33,7 +33,7 @@ The disposable layers are:
 
 The development resource group remains when AKS is destroyed. AKS, networking, observability, and security resources can be removed and recreated inside the same resource group without deleting the organisational boundary.
 
-Separating bootstrap and foundation would be more common in a larger enterprise platform, especially with multiple subscriptions, environments, teams, or lifecycle owners. This repository intentionally keeps those persistent concerns together in `00-bootstrap` for a smaller personal learning project.
+Separating bootstrap and foundation would be more common in a larger organisation, especially with multiple subscriptions, environments, teams, or lifecycle owners. This repo keeps those persistent concerns together in `00-bootstrap` because the current platform has only one persistent resource group.
 
 Use this naming convention for regional Azure resources:
 

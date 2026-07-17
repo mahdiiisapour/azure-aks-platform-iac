@@ -10,7 +10,7 @@ Accepted
 
 ## Context
 
-The platform needs a simple Azure network baseline before AKS is introduced. This phase should reserve enough address space for a future AKS cluster without adding routing, egress, private endpoint, or cluster complexity too early.
+The platform needs a simple Azure network baseline before AKS is introduced. This layer reserves enough address space for AKS without adding routing, egress, private endpoint, or cluster complexity too early.
 
 ## Decision
 
@@ -29,7 +29,7 @@ snet-private-endpoints-dev-neu 10.50.2.0/24
 snet-reserved-dev-neu          10.50.3.0/24
 ```
 
-Reserve these future AKS Kubernetes ranges:
+Reserve these AKS Kubernetes ranges:
 
 ```text
 Pod CIDR        10.244.0.0/16
@@ -37,7 +37,7 @@ Service CIDR    10.245.0.0/16
 DNS service IP  10.245.0.10
 ```
 
-The intended future AKS network model is:
+The AKS network model is:
 
 - Azure CNI Overlay
 - Cilium data plane
@@ -50,9 +50,9 @@ Azure CNI Overlay lets nodes use VNet IPs while pods use an overlay address rang
 
 Cilium is the intended data plane because it aligns with modern AKS networking capabilities and gives a strong future path for Kubernetes network policy and observability.
 
-The initial future egress choice is `loadBalancer` because it is the simplest AKS-managed outbound model. It avoids NAT Gateway and Azure Firewall costs while the platform is still establishing its baseline.
+The initial egress choice is `loadBalancer` because it is the simplest AKS-managed outbound model. It avoids NAT Gateway and Azure Firewall costs while the platform is still taking shape.
 
-Separate system and user subnets keep future node pool boundaries clear. Reserved private endpoint and expansion subnets reduce the chance that the VNet must be reshaped later.
+Separate system and user subnets keep node pool boundaries clear. Reserved private endpoint and expansion subnets reduce the chance that the VNet must be reshaped later.
 
 ## Alternatives Considered
 
@@ -85,4 +85,3 @@ It is postponed because it requires additional DNS and connectivity design. The 
 This phase creates only the base network shape. It does not enforce subnet-level security, route outbound traffic through a dedicated appliance, or create private connectivity.
 
 Those controls can be added later through explicit architecture decisions.
-

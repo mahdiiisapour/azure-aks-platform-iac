@@ -1,17 +1,17 @@
-# Azure AKS Platform Reference Architecture
+# Azure AKS Platform
 
-Secure, GitOps-managed Azure AKS platform for internal engineering teams.
+Terraform for a small Azure AKS platform in a single `dev` environment.
 
 ## Goal
 
-Build a secure, GitOps-managed AKS platform for internal engineering teams, provisioned with Terraform and designed around Entra ID, Azure RBAC, Workload Identity, Azure networking, Azure-native observability, policy-driven controls, and repeatable day-2 operations.
+Build a secure AKS platform that can later be managed with GitOps. The current focus is the Azure side: state storage, networking, cluster identity, RBAC, and a small AKS cluster that fits inside the Azure Free Trial limits.
 
 ## Initial Scope
 
 - One Azure subscription
 - One `dev` environment
 - North Europe (`northeurope`, `neu`)
-- AKS Standard
+- AKS Free tier for now because this subscription is cost and quota constrained
 - Terraform for Azure infrastructure
 - GitHub Actions with OIDC federation
 - Argo CD for Kubernetes GitOps
@@ -41,8 +41,8 @@ Build a secure, GitOps-managed AKS platform for internal engineering teams, prov
 ```text
 infra/
   00-bootstrap/       Terraform state storage and persistent dev resource group
-  20-network/         VNet, subnets, and network controls
-  30-aks/             AKS, node pools, and cluster configuration
+  20-network/         VNet and subnets
+  30-aks/             AKS cluster, identities, and cluster RBAC
   40-observability/   Azure Monitor, Managed Prometheus, and Grafana
   50-security/        Key Vault, workload identity, and policies
 docs/
@@ -74,4 +74,6 @@ Prefer Microsoft Entra identity, OIDC federation, managed identity, and Azure Wo
 
 Phase 4A — AKS cluster foundation.
 
-`infra/00-bootstrap` owns Terraform state storage and the persistent `dev` platform resource group. `infra/20-network` defines the disposable VNet and subnet baseline. `infra/30-aks` defines the temporary Free Trial AKS cluster foundation.
+`infra/00-bootstrap` owns Terraform state storage and the persistent `dev` platform resource group. `infra/20-network` owns the disposable VNet and subnets. `infra/30-aks` now owns a temporary one-node AKS cluster using `Standard_EC2as_v5`.
+
+The cluster is deliberately small. It is enough to test the platform wiring, but it is not a resilient production shape.

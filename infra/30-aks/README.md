@@ -1,43 +1,47 @@
-# AKS Cluster Layer
+# AKS Cluster
 
-This disposable layer creates the temporary AKS cluster foundation for the North Europe `dev` environment.
+This layer creates the first AKS cluster for the North Europe `dev` environment.
 
-It creates:
+It is intentionally small because the subscription is still on Azure Free Trial. The cluster is useful for testing the platform wiring, but it should not be treated as resilient.
+
+## What This Layer Creates
 
 - AKS cluster `aks-platform-dev-neu`
-- Control-plane user-assigned managed identity
-- Kubelet user-assigned managed identity
+- User-assigned managed identity for the AKS control plane
+- User-assigned managed identity for the kubelet
 - Subnet-scoped Azure RBAC assignments for AKS networking
 - Managed Identity Operator assignment over the kubelet identity
 - Azure Kubernetes Service RBAC Cluster Admin assignment for the current human principal
 - One temporary system node pool
 
-It does not create ACR, Key Vault, Argo CD, observability resources, ingress, NAT Gateway, Azure Firewall, private endpoints, application identities, or workloads.
+It does not create ACR, Key Vault, Argo CD, observability, ingress, NAT Gateway, Azure Firewall, private endpoints, workload identities, or workloads.
 
-## Temporary Free Trial Shape
+## Current Cluster Shape
 
-The Azure Free Trial quota in North Europe currently allows only 4 total regional vCPUs. This phase therefore creates exactly one system node using `Standard_EC2as_v5`, a 2-vCPU, 16-GB non-B-series SKU that is available to this subscription.
+North Europe currently has only 4 regional vCPUs available in this Azure Free Trial subscription. For that reason, this layer creates exactly one system node.
 
-This is a non-resilient lab configuration. Production AKS should use at least two system nodes, preferably three or more, and should normally use availability zones where available.
+The node size is `Standard_EC2as_v5`, which gives 2 vCPUs and 16 GB RAM. It is a non-B-series SKU that is available to this subscription in North Europe.
 
-The user node pool is intentionally deferred because the current quota is too small for a resilient system pool plus user capacity. The existing user subnet remains reserved for a later phase.
+One system node is not resilient. A production AKS cluster should have at least two system nodes, and three is usually a better starting point. Availability zones should also be considered once the design moves beyond this small lab shape.
 
-Node pool upgrade surge is set to `1`. With the selected 2-vCPU node size, an upgrade can temporarily require the full 4-vCPU Free Trial regional quota. This leaves no spare quota headroom and remains a lab-only compromise.
+The user node pool is deferred because the current quota is too small for a separate workload pool. The user subnet still exists and is ready for that later phase.
+
+Node pool upgrade surge is set to `1`. During an upgrade, AKS may briefly need one extra `Standard_EC2as_v5` node. That can use the full 4-vCPU regional quota, so upgrades have very little headroom.
 
 ## Kubernetes Version Strategy
 
 The cluster does not pin `kubernetes_version`. Azure will select the current supported default version for North Europe.
 
-This avoids hard-coding an old patch version. A future production design may pin and deliberately upgrade versions through a controlled process.
+This avoids leaving an old patch version in the repo. A stricter environment would pin versions and upgrade them on purpose.
 
 ## Identity And Access
 
-The cluster uses pre-created user-assigned managed identities:
+The cluster uses two user-assigned managed identities:
 
 - Control plane: `id-aks-control-plane-dev-neu`
 - Kubelet: `id-aks-kubelet-dev-neu`
 
-The control-plane identity receives `Network Contributor` only on the system and user node subnets. It also receives `Managed Identity Operator` only over the kubelet identity.
+The control-plane identity gets `Network Contributor` only on the system and user node subnets. It also gets `Managed Identity Operator` only over the kubelet identity.
 
 Local AKS accounts are disabled. Human administration uses Microsoft Entra authentication with Azure RBAC. The current signed-in principal receives `Azure Kubernetes Service RBAC Cluster Admin` scoped to the AKS cluster resource.
 
@@ -73,13 +77,15 @@ terraform init -backend-config=backend.local.hcl
 
 ## Local Network Inputs
 
-This layer intentionally does not use `terraform_remote_state`. Create an ignored local tfvars file from the network outputs:
+This layer does not use `terraform_remote_state`. For this small single-environment setup, the required network values are copied into an ignored local tfvars file.
+
+Read the network outputs:
 
 ```bash
 terraform -chdir=../20-network output -json
 ```
 
-Then create `network.auto.tfvars` with:
+Create `network.auto.tfvars` with:
 
 ```hcl
 vnet_address_space = ["10.50.0.0/16"]
@@ -93,7 +99,7 @@ user_subnet_id     = "<subnet_ids.aks_user>"
 ARM_RESOURCE_PROVIDER_REGISTRATIONS=none terraform plan -out=tfplan
 ```
 
-Do not run `terraform apply`; that command is reserved for the manual approval step.
+Review the plan before applying it. Apply remains a manual step.
 
 ## Diagrams
 
@@ -129,7 +135,7 @@ Subnet Network Contributor assignments
 Managed Identity Operator assignment
         │
         ▼
-AKS cluster with one system node
+AKS cluster with one temporary system node
         │
         ▼
 Current principal AKS RBAC Cluster Admin assignment
